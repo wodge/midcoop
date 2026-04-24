@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Middleton Co-operating — Our Circles</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,700;0,900;1,700&family=Libre+Franklin:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --red:   #c8102e;
+      --green: #007a3d;
+      --bg:    #e8f2ea;
+      --text:  #1a1a1a;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Libre Franklin', sans-serif;
+      background: var(--bg);
+      /* subtle paper grain */
+      background-image:
+        radial-gradient(circle at 20% 50%, rgba(0,122,61,.04) 0%, transparent 60%),
+        radial-gradient(circle at 80% 20%, rgba(200,16,46,.03) 0%, transparent 50%);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Header ────────────────────────────────── */
+    header {
+      background: var(--green);
+      padding: clamp(.75rem,3vw,1.25rem) clamp(1rem,4vw,2rem);
+      display: flex;
+      align-items: center;
+      gap: clamp(.6rem,2vw,1rem);
+    }
+
+    .logo-wrap {
+      flex-shrink: 0;
+      height: clamp(52px,9vw,74px);
+      display: flex;
+      align-items: center;
+    }
+
+    .logo-wrap img {
+      height: 100%;
+      width: auto;
+      display: block;
+    }
+
+    header h1 {
+      font-family: 'Fraunces', serif;
+      font-weight: 700;
+      color: white;
+      font-size: clamp(1.05rem,3.5vw,1.65rem);
+      line-height: 1.2;
+      /* Slight stamp/letterpress feel */
+      text-shadow: 1px 1px 0 rgba(0,0,0,.15);
+    }
+
+    /* ── Page body ─────────────────────────────── */
+    .page-body {
+      display: flex;
+      flex-direction: column;
+      gap: clamp(1.5rem,4vw,2.5rem);
+      padding: clamp(.9rem,3vw,2rem) clamp(.75rem,3vw,1.75rem);
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+
+    .main-col { flex: 1; min-width: 0; }
+
+    /* ── Circles area ──────────────────────────── */
+    .circles-area {
+      display: flex;
+      flex-wrap: wrap;
+      gap: clamp(.35rem,1vw,.65rem);
+      justify-content: center;
+      align-items: center;
+    }
+
+    @media (min-width: 680px) {
+      .circle-link:nth-child(5n+1) { margin-top: 18px; }
+      .circle-link:nth-child(5n+2) { margin-top: 4px; }
+      .circle-link:nth-child(5n+3) { margin-top: -6px; }
+      .circle-link:nth-child(5n+4) { margin-top: 24px; }
+      .circle-link:nth-child(5n)   { margin-top: 8px; }
+    }
+
+    /* ── Circle link base ─────────────────────── */
+    .circle-link {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      text-decoration: none;
+      cursor: pointer;
+      /* Per-circle rustic tilt via custom property */
+      transform: rotate(var(--tilt, 0deg));
+      transition:
+        transform .3s cubic-bezier(.34,1.56,.64,1),
+        filter .2s ease;
+    }
+
+    .circle-link:hover {
+      transform: rotate(calc(var(--tilt, 0deg) * 0.3)) scale(1.07);
+      filter: brightness(1.09);
+      z-index: 10;
+    }
+    .circle-link:focus-visible { outline: 3px solid white; outline-offset: 6px; }
+
+    /* Sizes */
+    .sz-xxl { width: clamp(138px,19vw,192px); height: clamp(120px,16vw,168px); }
+    .sz-xl  { width: clamp(116px,17vw,160px); height: clamp(100px,14vw,138px); }
+    .sz-lg  { width: clamp(96px, 13vw,136px); height: clamp(82px, 11vw,116px); }
+    .sz-md  { width: clamp(80px, 11vw,112px); height: clamp(68px,  9vw, 96px); }
+    .sz-sm  { width: clamp(70px,9.5vw, 98px); height: clamp(60px,  8vw, 84px); }
+    .sz-xs  { width: clamp(60px, 8vw,  82px); height: clamp(52px,  7vw, 70px); }
+
+    /* SVG fills container */
+    .circle-link svg.c-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+
+    /* ── Circle labels ─────────────────────────── */
+    .circle-label {
+      position: relative;
+      z-index: 2;
+      padding: clamp(.3rem,.8vw,.6rem) clamp(.35rem,.9vw,.65rem);
+      font-family: 'Fraunces', serif;
+      font-weight: 700;
+      line-height: 1.18;
+      pointer-events: none;
+      opacity: 0;
+      animation: labelIn .4s ease var(--td, 1.5s) forwards;
+    }
+
+    .sz-xxl .circle-label { font-size: clamp(.76rem,1.45vw,1.02rem); }
+    .sz-xl  .circle-label { font-size: clamp(.86rem,1.75vw,1.25rem); }
+    .sz-lg  .circle-label { font-size: clamp(.8rem, 1.55vw,1.05rem); }
+    .sz-md  .circle-label { font-size: clamp(.7rem, 1.25vw, .9rem);  }
+    .sz-sm  .circle-label { font-size: clamp(.6rem, 1.05vw, .78rem); }
+    .sz-xs  .circle-label { font-size: clamp(.56rem,  1vw,  .72rem); }
+
+    .active   .circle-label { color: white; text-shadow: 0 1px 3px rgba(0,0,0,.25); }
+    .emerging .circle-label { color: white; text-shadow: 0 1px 3px rgba(0,0,0,.25); }
+    .explore  .circle-label {
+      color: #2a2a2a;
+      font-family: 'Libre Franklin', sans-serif;
+      font-style: italic;
+      font-weight: 600;
+    }
+
+    /* ── SVG fill & stroke ─────────────────────── */
+    .c-fill {
+      opacity: 0;
+      animation: fillIn .55s ease var(--fd, 1.2s) forwards;
+    }
+    .active   .c-fill { fill: var(--red);   }
+    .emerging .c-fill { fill: var(--green); }
+    .explore  .c-fill { fill: none; }
+
+    .c-stroke {
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-dasharray: var(--perim, 460);
+      stroke-dashoffset: var(--perim, 460);
+      animation: strokeDraw var(--dd, 1.2s) cubic-bezier(.4,0,.2,1) var(--ds, .1s) forwards;
+    }
+    .active   .c-stroke { stroke: var(--red);   stroke-width: 5; }
+    .emerging .c-stroke { stroke: var(--green); stroke-width: 5; }
+    .explore  .c-stroke { stroke: #6e6e6e;      stroke-width: 2.5; }
+
+    @keyframes strokeDraw { to { stroke-dashoffset: 0; } }
+    @keyframes fillIn     { to { opacity: 1; } }
+    @keyframes labelIn {
+      from { opacity: 0; transform: scale(.9) rotate(-1deg); }
+      to   { opacity: 1; transform: scale(1)  rotate(0deg); }
+    }
+
+    /* ── Legend ────────────────────────────────── */
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .45rem 1.1rem;
+      justify-content: center;
+      margin-top: clamp(.9rem,2.5vw,1.4rem);
+      font-size: .8rem;
+      color: #555;
+    }
+    .legend-item { display: flex; align-items: center; gap: .4rem; }
+    .leg-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+    .leg-dot.a { background: var(--red); }
+    .leg-dot.e { background: var(--green); }
+    .leg-dot.x { border: 2px solid #6e6e6e; }
+
+    /* ── Sidebar ───────────────────────────────── */
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: clamp(1rem,3vw,1.5rem);
+    }
+
+    .sidebar-section h2 {
+      font-size: .78rem;
+      font-weight: 600;
+      letter-spacing: .025em;
+      color: #555;
+      margin-bottom: .55rem;
+    }
+
+    .pills { display: flex; flex-wrap: wrap; gap: .45rem; }
+
+    /* Pill base — rustic rotations via --pr custom property */
+    .pill {
+      display: inline-block;
+      padding: .3rem .8rem;
+      border-radius: 999px;
+      font-family: 'Fraunces', serif;
+      font-weight: 700;
+      font-size: clamp(.72rem,1.3vw,.86rem);
+      text-decoration: none;
+      cursor: pointer;
+      opacity: 0;
+      transform: rotate(var(--pr, 0deg));
+      transition:
+        transform .2s cubic-bezier(.34,1.56,.64,1),
+        box-shadow .2s ease,
+        background .18s ease,
+        color .18s ease;
+      animation: pillSlide .45s ease var(--pd, 1.8s) forwards;
+    }
+
+    .pill:hover {
+      transform: rotate(calc(var(--pr, 0deg) * 0.2)) translateY(-3px) scale(1.04);
+      box-shadow: 0 5px 14px rgba(0,0,0,.16);
+    }
+
+    .pill.g { background: var(--green); color: white; }
+    .pill.r { border: 2.5px solid var(--red); color: var(--red); background: transparent; }
+    .pill.r:hover { background: var(--red); color: white; }
+
+    @keyframes pillSlide {
+      from { opacity: 0; transform: rotate(var(--pr, 0deg)) translateX(16px); }
+      to   { opacity: 1; transform: rotate(var(--pr, 0deg)) translateX(0); }
+    }
+
+    /* ── Desktop ───────────────────────────────── */
+    @media (min-width: 700px) {
+      .page-body { flex-direction: row; align-items: flex-start; }
+      .sidebar {
+        width: clamp(210px,27vw,278px);
+        flex-shrink: 0;
+        padding-top: .3rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Shared SVG filter defs — roughen / hand-drawn effect -->
+<svg width="0" height="0" style="position:absolute;overflow:hidden">
+  <defs>
+    <!-- Roughen for filled + outlined circles -->
+    <filter id="rough-circle" x="-15%" y="-15%" width="130%" height="130%">
+      <feTurbulence type="turbulence" baseFrequency="0.042" numOctaves="4" seed="7" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="4" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <!-- Subtler roughen for outline-only circles -->
+    <filter id="rough-outline" x="-15%" y="-15%" width="130%" height="130%">
+      <feTurbulence type="turbulence" baseFrequency="0.055" numOctaves="3" seed="12" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+</svg>
+
+<header>
+  <div class="logo-wrap">
+    <img src="data:image/png;base64,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" alt="Middleton Co-operating logo">
+  </div>
+  <h1>Middleton<br>Co-operating</h1>
+</header>
+
+<div class="page-body">
+
+  <div class="main-col">
+    <div class="circles-area">
+
+      <!-- ─── Active circles (red) ─────────────────── -->
+
+      <a href="#energy" class="circle-link active sz-xl"
+         style="--ds:.1s;--dd:1.3s;--perim:460;--fd:1.3s;--td:1.5s;--tilt:-2deg">
+        <svg class="c-svg" viewBox="0 0 162 140" preserveAspectRatio="xMidYMid meet" filter="url(#rough-circle)">
+          <ellipse class="c-fill"   cx="81" cy="70" rx="77" ry="66"/>
+          <ellipse class="c-stroke" cx="81" cy="70" rx="77" ry="66" transform="rotate(-90,81,70)"/>
+        </svg>
+        <span class="circle-label">energy</span>
+      </a>
+
+      <a href="#housing" class="circle-link active sz-xl"
+         style="--ds:.3s;--dd:1.3s;--perim:460;--fd:1.5s;--td:1.7s;--tilt:1.5deg">
+        <svg class="c-svg" viewBox="0 0 162 140" preserveAspectRatio="xMidYMid meet" filter="url(#rough-circle)">
+          <ellipse class="c-fill"   cx="81" cy="70" rx="77" ry="66"/>
+          <ellipse class="c-stroke" cx="81" cy="70" rx="77" ry="66" transform="rotate(-90,81,70)"/>
+        </svg>
+        <span class="circle-label">housing</span>
+      </a>
+
+      <a href="#digital" class="circle-link active sz-lg"
+         style="--ds:.5s;--dd:1.1s;--perim:378;--fd:1.45s;--td:1.65s;--tilt:-3deg">
+        <svg class="c-svg" viewBox="0 0 138 118" preserveAspectRatio="xMidYMid meet" filter="url(#rough-circle)">
+          <ellipse class="c-fill"   cx="69" cy="59" rx="65" ry="55"/>
+          <ellipse class="c-stroke" cx="69" cy="59" rx="65" ry="55" transform="rotate(-90,69,59)"/>
+        </svg>
+        <span class="circle-label">digital</span>
+      </a>
+
+      <a href="#arts" class="circle-link active sz-xxl"
+         style="--ds:.7s;--dd:1.6s;--perim:558;--fd:2.15s;--td:2.35s;--tilt:2deg">
+        <svg class="c-svg" viewBox="0 0 192 168" preserveAspectRatio="xMidYMid meet" filter="url(#rough-circle)">
+          <ellipse class="c-fill"   cx="96" cy="84" rx="92" ry="80"/>
+          <ellipse class="c-stroke" cx="96" cy="84" rx="92" ry="80" transform="rotate(-90,96,84)"/>
+        </svg>
+        <span class="circle-label">arts, entertainment,<br>social space, sport</span>
+      </a>
+
+      <!-- ─── Emerging circles (green) ─────────────── -->
+
+      <a href="#social-care" class="circle-link emerging sz-lg"
+         style="--ds:.2s;--dd:1.1s;--perim:378;--fd:1.2s;--td:1.4s;--tilt:-1.5deg">
+        <svg class="c-svg" viewBox="0 0 138 118" preserveAspectRatio="xMidYMid meet" filter="url(#rough-circle)">
+          <ellipse class="c-fill"   cx="69" cy="59" rx="65" ry="55"/>
+          <ellipse class="c-stroke" cx="69" cy="59" rx="65" ry="55" transform="rotate(-90,69,59)"/>
+        </svg>
+        <span class="circle-label">social care</span>
+      </a>
+
+      <a href="#childcare" class="circle-link emerging sz-md"
+         style="--ds:.4s;--dd:.9s;--perim:309;--fd:1.2s;--td:1.4s;--tilt:3deg">
+        <svg class="c-svg" viewBox="0 0 114 98" preserveAspectRatio="xMidYMid meet" filter="url(#rough-circle)">
+          <ellipse class="c-fill"   cx="57" cy="49" rx="53" ry="45"/>
+          <ellipse class="c-stroke" cx="57" cy="49" rx="53" ry="45" transform="rotate(-90,57,49)"/>
+        </svg>
+        <span class="circle-label">childcare/<br>early years</span>
+      </a>
+
+      <a href="#advice" class="circle-link emerging sz-lg"
+         style="--ds:.6s;--dd:1.1s;--perim:378;--fd:1.55s;--td:1.75s;--tilt:-2.5deg">
+        <svg class="c-svg" viewBox="0 0 138 118" preserveAspectRatio="xMidYMid meet" filter="url(#rough-circle)">
+          <ellipse class="c-fill"   cx="69" cy="59" rx="65" ry="55"/>
+          <ellipse class="c-stroke" cx="69" cy="59" rx="65" ry="55" transform="rotate(-90,69,59)"/>
+        </svg>
+        <span class="circle-label">advice</span>
+      </a>
+
+      <!-- ─── To be explored (outline only) ────────── -->
+
+      <a href="#banking" class="circle-link explore sz-sm"
+         style="--ds:.8s;--dd:.8s;--perim:264;--td:1.55s;--tilt:1deg">
+        <svg class="c-svg" viewBox="0 0 100 86" preserveAspectRatio="xMidYMid meet" filter="url(#rough-outline)">
+          <ellipse class="c-stroke" cx="50" cy="43" rx="46" ry="39" transform="rotate(-90,50,43)"/>
+        </svg>
+        <span class="circle-label">personal banking</span>
+      </a>
+
+      <a href="#transport" class="circle-link explore sz-sm"
+         style="--ds:.95s;--dd:.8s;--perim:264;--td:1.7s;--tilt:-2.2deg">
+        <svg class="c-svg" viewBox="0 0 100 86" preserveAspectRatio="xMidYMid meet" filter="url(#rough-outline)">
+          <ellipse class="c-stroke" cx="50" cy="43" rx="46" ry="39" transform="rotate(-90,50,43)"/>
+        </svg>
+        <span class="circle-label">transport</span>
+      </a>
+
+      <a href="#food" class="circle-link explore sz-xs"
+         style="--ds:1.1s;--dd:.7s;--perim:230;--td:1.75s;--tilt:3.5deg">
+        <svg class="c-svg" viewBox="0 0 84 72" preserveAspectRatio="xMidYMid meet" filter="url(#rough-outline)">
+          <ellipse class="c-stroke" cx="42" cy="36" rx="39" ry="33" transform="rotate(-90,42,36)"/>
+        </svg>
+        <span class="circle-label">food</span>
+      </a>
+
+      <a href="#green-space" class="circle-link explore sz-sm"
+         style="--ds:1.2s;--dd:.8s;--perim:264;--td:1.95s;--tilt:-1.5deg">
+        <svg class="c-svg" viewBox="0 0 100 86" preserveAspectRatio="xMidYMid meet" filter="url(#rough-outline)">
+          <ellipse class="c-stroke" cx="50" cy="43" rx="46" ry="39" transform="rotate(-90,50,43)"/>
+        </svg>
+        <span class="circle-label">green space</span>
+      </a>
+
+      <a href="#mental-health" class="circle-link explore sz-sm"
+         style="--ds:1.3s;--dd:.8s;--perim:264;--td:2.05s;--tilt:2.5deg">
+        <svg class="c-svg" viewBox="0 0 100 86" preserveAspectRatio="xMidYMid meet" filter="url(#rough-outline)">
+          <ellipse class="c-stroke" cx="50" cy="43" rx="46" ry="39" transform="rotate(-90,50,43)"/>
+        </svg>
+        <span class="circle-label">mental health</span>
+      </a>
+
+      <a href="#repair" class="circle-link explore sz-md"
+         style="--ds:1.4s;--dd:.9s;--perim:309;--td:2.25s;--tilt:-3deg">
+        <svg class="c-svg" viewBox="0 0 114 98" preserveAspectRatio="xMidYMid meet" filter="url(#rough-outline)">
+          <ellipse class="c-stroke" cx="57" cy="49" rx="53" ry="45" transform="rotate(-90,57,49)"/>
+        </svg>
+        <span class="circle-label">repair &amp; recycle: clothing, white goods, furniture</span>
+      </a>
+
+      <a href="#learning" class="circle-link explore sz-sm"
+         style="--ds:1.5s;--dd:.8s;--perim:264;--td:2.25s;--tilt:1.5deg">
+        <svg class="c-svg" viewBox="0 0 100 86" preserveAspectRatio="xMidYMid meet" filter="url(#rough-outline)">
+          <ellipse class="c-stroke" cx="50" cy="43" rx="46" ry="39" transform="rotate(-90,50,43)"/>
+        </svg>
+        <span class="circle-label">learning, work, career</span>
+      </a>
+
+    </div><!-- /.circles-area -->
+
+    <div class="legend">
+      <div class="legend-item"><div class="leg-dot a"></div>active circle</div>
+      <div class="legend-item"><div class="leg-dot e"></div>emerging circle</div>
+      <div class="legend-item"><div class="leg-dot x"></div>to be explored</div>
+    </div>
+  </div><!-- /.main-col -->
+
+  <!-- ══ Sidebar ══════════════════════════════════════════ -->
+  <div class="sidebar">
+
+    <div class="sidebar-section">
+      <h2>cross cutting projects</h2>
+      <div class="pills">
+        <a href="#climate"   class="pill g" style="--pd:1.6s;--pr:-1.5deg">climate emergency</a>
+        <a href="#who-owns"  class="pill g" style="--pd:1.75s;--pr:1deg">Who Owns Middleton</a>
+        <a href="#town"      class="pill g" style="--pd:1.9s;--pr:-0.8deg">town centre</a>
+        <a href="#gm-income" class="pill g" style="--pd:2.05s;--pr:1.8deg">GM Living Income</a>
+        <a href="#gm-sc"     class="pill g" style="--pd:2.2s;--pr:-1.2deg">GM System Changers</a>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <h2>how — principles</h2>
+      <div class="pills">
+        <a href="#cwb"          class="pill r" style="--pd:2.05s;--pr:1.3deg">community wealth building</a>
+        <a href="#foundational" class="pill r" style="--pd:2.2s;--pr:-1.5deg">foundational economy</a>
+        <a href="#cooperating"  class="pill r" style="--pd:2.35s;--pr:.8deg">co-operating</a>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <h2>how — functional</h2>
+      <div class="pills">
+        <a href="#governance" class="pill r" style="--pd:2.3s;--pr:-1deg">governance/membership</a>
+        <a href="#employer"   class="pill r" style="--pd:2.45s;--pr:1.8deg">employer/operational</a>
+        <a href="#funding"    class="pill r" style="--pd:2.6s;--pr:-0.7deg">funding/resources</a>
+      </div>
+    </div>
+
+  </div><!-- /.sidebar -->
+
+</div><!-- /.page-body -->
+
+</body>
+</html>
